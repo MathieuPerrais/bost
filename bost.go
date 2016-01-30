@@ -22,10 +22,20 @@ const template = "---\nlayout: post\ntitle: %s\npermalink: %s\ntags:\n---\n"
 
 var directory string
 
+func search(query string) (filenames []string) {
+	cmd := "find"
+	args := []string{fmt.Sprintf("%s", directory), "-name", fmt.Sprintf("*%s*", query)}
+	out, err := exec.Command(cmd, args...).Output()
+	if err != nil {
+		os.Exit(1)
+	}
+	return strings.Split(string(out), "\n")
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "bost"
-	app.Version = "0.1.0"
+	app.Version = "0.2.0"
 	app.Usage = "interact with jekyll posts"
 
 	app.Flags = []cli.Flag{
@@ -79,19 +89,20 @@ func main() {
 				},
 			},
 			Action: func(c *cli.Context) {
-				query := c.Args().First()
-				cmd := "find"
-				args := []string{fmt.Sprintf("%s/", directory), "-name", fmt.Sprintf("*%s*", query)}
-				out, err := exec.Command(cmd, args...).Output()
-				if err != nil {
-					os.Exit(1)
-				}
-				files := strings.Split(string(out), "\n")
-				vi := exec.Command(c.String("editor"), files[0])
+				filenames := search(c.Args().First())
+				vi := exec.Command(c.String("editor"), filenames[0])
 				vi.Stdin = os.Stdin
 				vi.Stdout = os.Stdout
 				vi.Stderr = os.Stderr
 				vi.Run()
+			},
+		},
+		{
+			Name:    "search",
+			Aliases: []string{"s"},
+			Usage:   "search for posts",
+			Action: func(c *cli.Context) {
+				fmt.Print(strings.Join(search(c.Args().First()), "\n"))
 			},
 		},
 	}
