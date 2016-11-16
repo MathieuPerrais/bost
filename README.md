@@ -38,3 +38,14 @@ GLOBAL OPTIONS:
    --help, -h			show help
    --version, -v		print the version
 ```
+
+
+## Install
+
+```
+mkdir -p $HOME/gocode/{src,pkg,bin}
+git clone git@github.com:boertel/bost.git $HOME/gocode/src/github.com/boertel/bost
+export GOPATH=$GOPATH:$HOME/gocode
+export PATH=$PATH:$HOME/gocode/bin
+go install github.com/boertel/bost
+```
